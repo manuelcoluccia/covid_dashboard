@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Electrolize&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./style.css">
+    <title>Covid Dashboard</title>
+  </head>
+  <body>
+
+    <div class="modal-custom">
+        <div class="modal-custom-content">
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Doloribus illo error animi consectetur nihil repellat porro voluptas voluptate qui repudiandae. Temporibus quaerat asperiores totam fuga cupiditate minima harum sunt vitae.
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <p class="h2">Dati aggiornati al: <span id="data"></span> </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12 col-md-3 mb-3">
+                <div class="card-custom d-flex flex-column h-100">
+                    <p class="h4 mb-5">Casi totali </p>
+                    <p id="totalCases" class="h2 mb-0 text-right text-main mt-auto">123</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 mb-3">
+                <div class="card-custom d-flex flex-column h-100">
+                    <p class="h4 mb-5">Guariti totali </p>
+                    <p id="totalRecovered" class="h2 mb-0 text-right text-main mt-auto">123</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-3 mb-3">
+                    <div class="card-custom d-flex flex-column h-100">
+                        <p class="h4 mb-5">Morti totali </p>
+                        <p id="totalDeath" class="h2 mb-0 text-right text-main mt-auto">123</p>
+                    </div>
+            </div>
+            <div class="col-12 col-md-3 mb-3">
+                <div class="card-custom d-flex flex-column h-100">
+                    <p class="h4 mb-5">Positivi </p>
+                    <p id="totalPositive" class="h2 mb-0 text-right text-main mt-auto">123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-3">
+        <div class="row">
+
+            <div class="col-12 col-lg-6 scrollable">
+                <div id="cardWrapper" class="row p-3">
+                    
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6 scrollable">
+                <div id="progressWrapper" class="row p-3">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div id="trendNew" class="d-flex align-items-end border border-dark" style="height:400px;">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+   
+
+    
+    <script src="./scripts.js"></script>
+
+    <script>
+
+        fetch('https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-json/dpc-covid19-ita-regioni.json')
+        .then(response => response.json())
+        .then(dati => {
+            
+            //ordino dati piu recenti
+            let sorted = dati.reverse();
+
+            //ultima data caricata
+            let lastUpdated = sorted[0].data
+
+
+            //formattazione per mostrare data utlimo update
+            let lastUpdatedFormatted = lastUpdated.split("T")[0].split("-").reverse().join("/")
+            document.querySelector('#data').innerHTML = lastUpdatedFormatted
+
+
+            let lastUpdatedData = sorted.filter(el=> el.data == lastUpdated).sort((a,b) => b.nuovi_positivi - a.nuovi_positivi)
+
+            let totalCases = lastUpdatedData.map(el =>el.totale_casi).reduce((t,n)=> t+n)
+            document.querySelector('#totalCases').innerHTML = totalCases
+
+            let totalRecovered = lastUpdatedData.map(el =>el.dimessi_guariti).reduce((t,n)=> t+n)
+            document.querySelector('#totalRecovered').innerHTML = totalRecovered
+
+            let totalDeath = lastUpdatedData.map(el =>el.deceduti).reduce((t,n)=> t+n)
+            document.querySelector('#totalDeath').innerHTML = totalDeath
+
+            let totalPositive = lastUpdatedData.map(el =>el.totale_positivi).reduce((t,n)=> t+n)
+            document.querySelector('#totalPositive').innerHTML = totalPositive
+
+            
+            let cardWrapper = document.querySelector('#cardWrapper')
+            let progressWrapper = document.querySelector('#progressWrapper')
+
+            let todayMax = Math.max(...lastUpdatedData.map(el=>el.nuovi_positivi))
+            
+
+            lastUpdatedData.forEach(el => {
+
+                let div = document.createElement('div')
+                div.classList.add('col-12','col-md-6','my-4')
+                div.innerHTML = 
+                `
+                    <div class="card-custom p-3 pb-0 h-100" data-region="${el.denominazione_regione}">
+                        <p>${el.denominazione_regione}</p>
+                        <p class="text-right h5 mb-0 text-main">${el.nuovi_positivi}</p>
+                    </div>
+                `
+                cardWrapper.appendChild(div)
+
+                let bar = document.createElement('div')
+                bar.classList.add('col-12', 'mb-5')
+                bar.innerHTML =
+                `
+                    <p class="mb-0">${el.denominazione_regione}: ${el.nuovi_positivi}</p>
+                    <div class="progress rounded-0">
+                        <div class="progress-bar bg-main" style="width:${100 * el.nuovi_positivi/todayMax}%">
+                        </div>
+                    </div>
+                `    
+                progressWrapper.appendChild(bar)
+                
+            });
+
+            let modal = document.querySelector('.modal-custom')
+            let modalContent = document.querySelector('.modal-custom-content')
+
+            document.querySelectorAll('[data-region').forEach(el=>{
+
+                el.addEventListener('click', ()=>{
+
+                    let region = el.dataset.region
+                    modal.classList.add('active')
+
+                    let dataAboutRegion = lastUpdatedData.filter(el => el.denominazione_regione == region)[0]
+
+                    modalContent.innerHTML = 
+                    `
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="h2 text-main">${dataAboutRegion.denominazione_regione}</p>
+                            </div>
+                            <div class="col-12">
+                                <p class="lead">Totale casi: ${dataAboutRegion.totale_casi}</p>
+                                <p class="lead">Nuovi positivi: ${dataAboutRegion.nuovi_positivi}</p>
+                                <p class="lead">Deceduti: ${dataAboutRegion.deceduti}</p>
+                                <p class="lead">Guariti: ${dataAboutRegion.dimessi_guariti}</p>
+                                <p class="lead">Ricoverati con sintomi: ${dataAboutRegion.ricoverati_con_sintomi}</p>
+                            </div>
+                        </div>
+                    </div>
+                    `
+                })
+            })
+
+            window.addEventListener('click',function(e){
+                if(e.target == modal){
+                    modal.classList.remove('active')
+                }
+            })
+
+            let trendNew = document.querySelector('#trendNew')
+
+            let lombardia = sorted.reverse().filter(el=>el.denominazione_regione == "Lombardia").map(el=>[el.data,el.nuovi_positivi])
+            
+            let maxLombardia = Math.max(...lombardia.map(el=>el[1]))
+
+            lombardia.forEach(el => {
+                let col = document.createElement('div')
+                col.classList.add('d-inline-block','bg-primary')
+                col.style.width = '10px'
+                col.style.marginRight = '1px'
+                col.style.height = `${70*el[1]/maxLombardia}%`
+
+                trendNew.appendChild(col)
+            })
+
+
+
+
+
+
+
+
+            
+        })
+
+
+    </script>
+
+  </body>
+</html>
