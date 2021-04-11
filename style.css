@@ -50,6 +50,7 @@ body{
     padding-top:20% ;
     background-color: rgba(0,0,0,0.5);
     transition:0.2s;
+    overflow:scroll;
 }
 
 .modal-custom-content{
@@ -64,3 +65,87 @@ body{
     z-index: 10;
     opacity: 1;
 }
+
+.pin-new{
+    border-right: 2px solid rgba(0,0,255,0.2);
+    position: relative;
+    width:5px;
+    margin-right: 5px;
+}
+
+.pin-new:after{
+    position: absolute;
+    content: "";
+    top: 0px;
+    right: -3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color:blue;
+}
+
+.pin-death{
+    border-right: 2px solid rgba(255,0,0,0.2);
+    position: relative;
+    width:5px;
+    margin-right: 5px;
+}
+
+.pin-death:after{
+    position: absolute;
+    content: "";
+    top: 0px;
+    right: -3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color:red;
+}
+
+.pin-recovered{
+    border-right: 2px solid rgba(0,255,0,0.2);
+    position: relative;
+    width:5px;
+    margin-right: 5px;
+}
+
+.pin-recovered:after{
+    position: absolute;
+    content: "";
+    top: 0px;
+    right: -3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color:green;
+}
+
+.plot{
+    height:200px;
+    width: 100%;
+    overflow-y: hidden;
+    overflow-x:scroll;
+
+}
+
+.btn-circle{
+    border: 0;
+    outline: 0;
+    background-color:#ebecf0;
+    box-shadow: -5px -5px 20px #fff,5px 5px 20px #babecc;
+    transition:0.4s;
+    border-radius:50px;
+    height:50px;
+    width:50px;
+}
+
+.btn-circle:hover{
+    box-shadow: -2px -2px 5px #fff, 2px 2px 5px #babecc;
+}
+
+.btn-circle:active{
+    box-shadow: inset 1px 1px 2px #babecc, inset -1px -1px 2px #fff;
+}
+
+
+
