@@ -26,19 +26,20 @@
     </div>
 
     
-    <div class="container py-5">
+    <div class="container py-4">
         <div class="row">
-            <div class="col-12 col-md-6">
-                <p class="h2 text-main">Dati aggiornati al: <span id="data"></span> </p>
+            <div class="col-6 ">
+                <h2 class="text-main font-weight-bold" >Covid Dashboard</h3>
+                <p class="h5 font-italic">Dati aggiornati al: <span id="data"></span> </p>
             </div>
-            <div class="col-12 col-md-6 ml-auto">
+            <div class="col-6  py-3 d-flex justify-content-end">
                 <button id="pieTrigger" class="btn btn-circle mx-4"><i class="fas fa-chart-pie text-main"></i></button>
                 <button id="mapTrigger" class="btn btn-circle "><i class="fas fa-globe-africa text-main"></i></button>
             </div>
         </div>
     </div>
 
-    <div class="container py-5">
+    <div class="container py-3">
         <div class="row">
             <div class="col-12 col-md-3 mb-3">
                 <div class="card-custom d-flex flex-column h-100" data-trend="totale_casi">
@@ -71,7 +72,7 @@
         <div class="row">
 
             <div class="col-12 col-lg-6 scrollable">
-                <div id="cardWrapper" class="row p-3">
+                <div id="cardWrapper" class="row p-1">
                     
                 </div>
             </div>
@@ -135,7 +136,6 @@
                 return el
             })
             
-            console.log(sorted[0]);
 
             //ultima data caricata
             let lastUpdated = sorted[0].data
@@ -178,13 +178,13 @@
                     modal.classList.add('active')
                     modalContent.innerHTML = 
                     `
-                    <div class="container  py-3">
+                    <div class="container py-3 ">
                         <div class="row">
                             <div class="col-12">
-                                <p class="h3 text-main">${set.replace(/_/g," ").toUpperCase()}</p>
+                                <p class="h3 text-main pt-4">${set.replace(/_/g," ").toUpperCase()}</p>
                             </div>   
                             <div class="col-12">
-                                <div id="totalTrend"  class="d-flex align-items-end plot"></div>
+                                <div id="totalTrend"  class="d-flex align-items-end plot" style="height:60vh"></div>
                             </div>
                         </div>
                     </div>
@@ -216,10 +216,10 @@
             lastUpdatedData.forEach(el => {
 
                 let div = document.createElement('div')
-                div.classList.add('col-12','col-md-6','my-4')
+                div.classList.add('col-12','col-md-6','my-3')
                 div.innerHTML = 
                 `
-                    <div class="card-custom p-3 pb-0 h-100" data-region="${el.denominazione_regione}">
+                    <div class="card-custom p-3 pb-0 h5 h-100" data-region="${el.denominazione_regione}">
                         <p>${el.denominazione_regione}</p>
                         <p class="text-right h5 mb-0 text-main">${el.nuovi_positivi}</p>
                     </div>
@@ -227,7 +227,7 @@
                 cardWrapper.appendChild(div)
 
                 let bar = document.createElement('div')
-                bar.classList.add('col-12', 'mb-5')
+                bar.classList.add('col-12', 'mb-4')
                 bar.innerHTML =
                 `
                     <p class="mb-0">${el.denominazione_regione}: ${el.nuovi_positivi}</p>
@@ -322,6 +322,8 @@
                 })
             })
 
+            //mappa italia
+
             let mapTrigger = document.querySelector('#mapTrigger')
             mapTrigger.addEventListener('click',()=>{
                 modal.classList.add('active')
@@ -329,9 +331,9 @@
                 `
                     <div class="container">
                         <div class="row">
-                            <div class="d-flex align-items-center justify-content-center w-100" style="70vh">
+                            <div class="d-flex align-items-center justify-content-center w-100 p-3 " style="height:100vh">
                                 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-                                    <!-- Created for MapSVG plugin: http://mapsvg.com -->
+
                                     <svg
                                     xmlns:mapsvg="http://mapsvg.com"
                                     xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -459,36 +461,74 @@
                 `
                 
 
-                lastUpdatedData.forEach(el => {
-                    
+                lastUpdatedData.forEach(el => { 
                     let id = document.querySelector(`#${el.code}`)
                     if(id != null){
-                        
                         id.style.fill = `rgba(17,67,153,${el.nuovi_positivi / 2000})`
                     }
-   
                     
                 })  
+                
+            })
+            
 
+            //grafico piechart
 
-                let pieTrigger = document.querySelector('#pieTrigger')
+            let pieTrigger = document.querySelector('#pieTrigger')
                 pieTrigger.addEventListener('click',()=>{
                     modal.classList.add('active')
-                    modal.content.innerHTML =
+
+                    let temp = []
+                    for (let i = 21; i >=1; i--) {
+                       let color = `rgba(17,67,153,${ (i / 21).toFixed(2) })`
+                       temp.push(color)
+                        
+                    }
+
+                    let max = lastUpdatedData.map(el => el.nuovi_positivi).reduce((t,n)=> t+n)
+
+                    let recap = lastUpdatedData.map( (el,i) => [el.denominazione_regione,el.nuovi_positivi,temp[i]]).sort()
+
+                    let start = 0
+                    let cumulative = [0,...recap.map(el => start += +(360*el[1]/max).toFixed(3))]
+
+
+                    let spreader = cumulative
+                    .map((el,i)=>[cumulative[i], cumulative[i+1]])
+                    .splice(0,cumulative.length-1)
+                    .map( (el,i)=> [...el,...recap[i]])
+
+                    let final = spreader.map(el => [`${el[4]} ${el[0]}deg ${el[1]}deg`,...el])
+                    
+
+                    let valueToShow = final.map(el => el[0]).join(",")
+
+
+            
+                    modalContent.innerHTML =
                     `
                     <div class="container my-5 py-5">
-                        <div class="row">
-                            <div class="col-12">
-
-                            </div>
+                        <div class="row justify-content-center align-items-cente">
+                            <div class="pieChart"> </div>
+                        </div>
+                        <div id="legend" class="row mt-3 ">
+                           
                         </div>
                     </div>
                     `
-                })
 
-                
-                
-            })
+                    document.querySelector('.pieChart').style.background = `conic-gradient(${valueToShow})`
+
+                    let legend = document.querySelector('#legend')
+                    final.forEach(el =>{
+                        let voice = document.createElement('div')
+                        voice.classList.add('col-6', 'col-md-3', 'mb-3')
+                        voice.innerHTML = `<p class="small mb-0">${el[3]}: ${el[4]}</p>`
+                        voice.style.borderLeft = `6px solid ${el[5]}`
+                        legend.appendChild(voice)
+                    })
+
+                })
             
             window.addEventListener('click',function(e){
                 if(e.target == modal){
